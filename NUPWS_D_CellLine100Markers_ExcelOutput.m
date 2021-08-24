@@ -110,7 +110,7 @@ phi=0.35;Nf=1e6;thickness=2;,Sigma_min=0.1,Sigma_max=0.6;
 % Polynomial function that estimates D from Sigma values
  D_map= polyval(polyVals, NW_PWSImage);
  CellImage=D_map
-
+%Random change
 
 CellMask(1:45,980:1024)=0;
 CellMask(1:45,1:45)=0;
