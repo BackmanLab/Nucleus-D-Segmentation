@@ -108,7 +108,7 @@ CellMask(1:45,980:1024)=0;
 CellMask(1:45,1:45)=0;
 CellMask(980:1024,1:45)=0;
 CellMask(980:1024,980:1024)=0;
-CellImage(CellMask==0)=0;
+CC(CellMask==0)=0;
 
 [MakerArray]=PWSLocal100Markers(CellImage,NucMask);
 CellMarkerArray(k,:)=MakerArray;

@@ -25,8 +25,8 @@ end
 [baseFileName,folder] = uigetfile
 fullFileName = fullfile(folder, baseFileName);
 k=1;
-for v=1:4
-    %v
+for v=1:15
+    v
 clearvars -except CellMarkerArray MaskRow DatasetRow MaskfullName AnalysisName v fullFileName k folder baseFileName kk
  
 idx1 = strfind(fullFileName,"Cell");
@@ -45,7 +45,9 @@ folder=insertAfter(folder,"Cell",CellNumber);
  
 %a = h5read('C:\Users\ali_n\Documents\Northwestern PC\Projects\PWS Project\Projects\SOP\95% Ethanol Fixation _Time Variant Analysis\Hella Cell_Practice\liveorig\Cell E\Cell52\PWS\analyses\analysisResults_fixed.h5', '/rms')
 NW_PWSImage = h5read(fullFileName, '/rms');
- 
+noise=0.02;
+true_rms = sqrt(NW_PWSImage.^2 - noise.^2);
+
 f=folder;
 f1=folder(1:end-13);
 d=dir(f1);
@@ -101,16 +103,7 @@ windowSize = 16; % Whatever you want.
 kernel = ones(windowSize, windowSize) / windowSize ^ 2;
 blurredBWfilter = imfilter(BWfilter, kernel, 'symmetric');
 CellMask= bwpropfilt(blurredBWfilter,'perimeter',5);
-
-%Transfer Sigma Map to Dmap
-phi=0.35;Nf=1e6;thickness=2;,Sigma_min=0.1,Sigma_max=0.6;
-%Phi is estimated based on A549 cells (between 0.3-0.4).Thickness was
-%measured for HCT116 to be 2 micron by 3D optical profilometer.
-[polyVals]=NU_SigmaToD_polyApprox(phi,Nf,thickness,Sigma_min,Sigma_max)
-% Polynomial function that estimates D from Sigma values
- D_map= polyval(polyVals, NW_PWSImage);
- CellImage=D_map
-%Random change
+CellImage=NW_PWSImage;
 
 CellMask(1:45,980:1024)=0;
 CellMask(1:45,1:45)=0;
@@ -118,7 +111,18 @@ CellMask(980:1024,1:45)=0;
 CellMask(980:1024,980:1024)=0;
 CellImage(CellMask==0)=0;
 
-[MakerArray]=PWSLocal100Markers(CellImage,NucMask);
+%Transfer Sigma Map to Dmap
+phi=0.35;Nf=1e6;thickness=2;,Sigma_min=0.02,Sigma_max=0.6;
+%Phi is estimated based on A549 cells (between 0.3-0.4).Thickness was
+%measured for HCT116 to be 2 micron by 3D optical profilometer.
+[polyVals]=NU_SigmaToD_polyApprox(phi,Nf,thickness,Sigma_min,Sigma_max);
+% Polynomial function that estimates D from Sigma values
+ D_map= polyval(polyVals, CellImage);
+ CellImage=D_map;
+%Random change
+
+
+[MakerArray]=PWSLocalD100Markers(CellImage,NucMask);
 CellMarkerArray(k,:)=MakerArray;
 Cell_Marker_Array(v,kk,:)=MakerArray;
  
@@ -137,7 +141,7 @@ AnalysisName=AnalysisName';
  
 
 f1=folder;f1(end-19:end)=[];
-f2='_Rms100markersMatlabData_June29_2021';
+f2='_D_100markersMatlabData_Aug25_2021';
 f3='.xlsx';
 f=[f1 f2 f3];
 
