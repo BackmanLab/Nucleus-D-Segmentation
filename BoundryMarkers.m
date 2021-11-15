@@ -1,4 +1,4 @@
-function [Marker_Boundry1 Marker_Boundry2 Marker_Center]= BoundryMarkers(NucImage,Mask,windowSize)
+function [Marker_Edge_Ave, Marker_NearEdge_Ave, Marker_Center_Ave, Marker_Edge_Std, Marker_NearEdge_Std, Marker_Center_Std, Marker_Edge_entropy, Marker_NearEdge_entropy, Marker_Center_entropy]= BoundryMarkers(NucImage,Mask,windowSize)
 clear Boundry blurredBoundry kernel CenterBoundry B BB blurredBoundry1 blurredBoundry2 Center
 B = bwboundaries(Mask,'noholes') ;
 BB=cell2mat(B);
@@ -25,6 +25,7 @@ blurredBoundry1(NucImage==0)=0;
 %Correction_Coef=(sum(sum(blurredBoundry1))+sum(sum(Boundry)))/(2*sum(sum(blurredBoundry1)));
 Image_Bundry1=NucImage;
 Image_Bundry1(blurredBoundry1==0)=0;
+Image_Bundry1(Mask==0)=0;
 
 %------Marker Second circle
 
@@ -37,7 +38,7 @@ blurredBoundry2(NucImage==0)=0;
 Image_Bundry2=NucImage;
 Image_Bundry2(blurredBoundry2==0)=0;
 Image_Bundry2=Image_Bundry2-Image_Bundry1;
-
+Image_Bundry2(Mask==0)=0;
 
 %%---Marker Center
 Max_MaskHight=max(max(BB(:,1)))-min(min(BB(:,1)));
@@ -56,9 +57,19 @@ CenterBoundry(CenterBoundry>0)=1;
 Image_Center=NucImage;
 Image_Center(CenterBoundry==0)=0;
 
-Marker_Boundry1=(sum(sum(Image_Bundry1))/sum(sum(blurredBoundry1)));
-Marker_Boundry2=(sum(sum(Image_Bundry2))/sum(sum(blurredBoundry2)));
-Marker_Center=sum(sum(Image_Center))/sum(sum(CenterBoundry));
+Marker_Edge_Ave=(sum(sum(Image_Bundry1))/sum(sum(blurredBoundry1)));
+Marker_NearEdge_Ave=(sum(sum(Image_Bundry2))/sum(sum(blurredBoundry2)));
+Marker_Center_Ave=sum(sum(Image_Center))/sum(sum(CenterBoundry));
+
+Marker_Edge_Std=std(Image_Bundry1(Image_Bundry1>0));
+Marker_NearEdge_Std=std(Image_Bundry2(Image_Bundry2>0));
+Marker_Center_Std=std(Image_Center(Image_Center>0));
+
+Marker_Edge_entropy = entropy(double(Image_Bundry1));
+Marker_NearEdge_entropy = entropy(double(Image_Bundry2));
+Marker_Center_entropy = entropy(double(Image_Center));
+
+
 %imshow(CenterBoundry*255)
 
 %rgbImage1 = cat(3, 2*Image_Bundry1, 0.5*Image_Bundry1, 0.5*Image_Bundry1);
