@@ -25,7 +25,7 @@ end
 [baseFileName,folder] = uigetfile
 fullFileName = fullfile(folder, baseFileName);
 k=1;
-for v=1:4
+for v=1:15% thE NUMBER IMAGES IN YOUR FOLDER
     %v
 clearvars -except CellMarkerArray MaskRow DatasetRow MaskfullName AnalysisName v fullFileName k folder baseFileName kk
  
